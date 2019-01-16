@@ -17,42 +17,42 @@ fn fmix32(mut h: u32) -> u32 {
     h
 }
 
-pub fn murmurhash3(mut key: &[u8]) -> u32 {
-    let len = key.len() as u32;
+pub fn murmurhash3(key: &[u8]) -> u32 {
     let mut h: u32 = SEED;
 
-    let num_blocks = len / 4;
-    for _ in 0..num_blocks {
-        let mut k: u32 = LittleEndian::read_u32(key);
+    let mut four_bytes_chunks = key.chunks_exact(4);
+
+    while let Some(chunk) = four_bytes_chunks.next() {
+        let mut k: u32 = LittleEndian::read_u32(chunk);
         k = k.wrapping_mul(C1);
         k = k.rotate_left(15);
         k = k.wrapping_mul(C2);
         h ^= k;
         h = h.rotate_left(13);
         h = (h.wrapping_mul(5)).wrapping_add(D);
-        key = &key[4..];
     }
 
-    match key.len() {
+    let remainder = four_bytes_chunks.remainder();
+    match remainder.len() {
         3 => {
-            let mut k = u32::from(key[2]) << 16;
-            k ^= u32::from(key[1]) << 8;
-            k ^= u32::from(key[0]);
+            let mut k = u32::from(remainder[2]) << 16;
+            k ^= u32::from(remainder[1]) << 8;
+            k ^= u32::from(remainder[0]);
             k = k.wrapping_mul(C1);
             k = k.rotate_left(15);
             k = k.wrapping_mul(C2);
             h ^= k;
         }
         2 => {
-            let mut k = u32::from(key[1]) << 8;
-            k ^= u32::from(key[0]);
+            let mut k = u32::from(remainder[1]) << 8;
+            k ^= u32::from(remainder[0]);
             k = k.wrapping_mul(C1);
             k = k.rotate_left(15);
             k = k.wrapping_mul(C2);
             h ^= k;
         }
         1 => {
-            let mut k = u32::from(key[0]);
+            let mut k = u32::from(remainder[0]);
             k = k.wrapping_mul(C1);
             k = k.rotate_left(15);
             k = k.wrapping_mul(C2);
@@ -60,8 +60,7 @@ pub fn murmurhash3(mut key: &[u8]) -> u32 {
         }
         _ => {}
     }
-    h ^= len;
-    fmix32(h)
+    fmix32(h ^ key.len() as u32)
 }
 
 #[cfg(test)]
