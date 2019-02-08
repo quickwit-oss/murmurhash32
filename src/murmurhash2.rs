@@ -1,3 +1,4 @@
+extern crate byteorder;
 use byteorder::{ByteOrder, LittleEndian};
 
 const SEED: u32 = 3_242_157_231u32;
