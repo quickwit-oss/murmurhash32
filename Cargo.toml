@@ -6,7 +6,7 @@ license = "MIT"
 description = """A simple implementation of murmurhash32_2"""
 edition = "2018"
 keywords = ["murmurhash"]
-repository = "https://github.com/tantivy-search/murmurhash32"
+repository = "https://github.com/quickwit-inc/murmurhash32"
 
 [dependencies]
 byteorder = "1.2"
