@@ -1,4 +1,4 @@
-use byteorder::{ByteOrder, LittleEndian};
+use std::convert::TryInto;
 
 const C1: u32 = 0xcc9e_2d51;
 const C2: u32 = 0x1b87_3593;
@@ -17,13 +17,14 @@ fn fmix32(mut h: u32) -> u32 {
     h
 }
 
+#[inline]
 pub fn murmurhash3(key: &[u8]) -> u32 {
     let mut h: u32 = SEED;
 
     let mut four_bytes_chunks = key.chunks_exact(4);
 
     while let Some(chunk) = four_bytes_chunks.next() {
-        let mut k: u32 = LittleEndian::read_u32(chunk);
+        let mut k: u32 = u32::from_le_bytes(chunk.try_into().unwrap());
         k = k.wrapping_mul(C1);
         k = k.rotate_left(15);
         k = k.wrapping_mul(C2);
@@ -78,5 +79,4 @@ mod test {
         assert_eq!(murmurhash3(b"abcde"), 2_747_833_956);
         assert_eq!(murmurhash3(b"abcdefghijklmnop"), 2_078_305_053);
     }
-
 }
