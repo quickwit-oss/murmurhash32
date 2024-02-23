@@ -1,6 +1,6 @@
 [package]
 name = "murmurhash32"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Paul Masurel <paul.masurel@gmail.com>"]
 license = "MIT"
 description = """A simple implementation of murmurhash32_2"""
