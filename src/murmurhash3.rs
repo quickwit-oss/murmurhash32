@@ -19,6 +19,12 @@ fn fmix32(mut h: u32) -> u32 {
 
 #[inline]
 pub fn murmurhash3(key: &[u8]) -> u32 {
+    murmurhash3_with_seed::<SEED>(key)
+}
+
+/// Murmurhash3 with a compile-time seed.
+#[inline]
+pub fn murmurhash3_with_seed<const SEED: u32>(key: &[u8]) -> u32 {
     let mut h: u32 = SEED;
 
     let mut four_bytes_chunks = key.chunks_exact(4);
@@ -67,7 +73,27 @@ pub fn murmurhash3(key: &[u8]) -> u32 {
 #[cfg(test)]
 mod test {
 
-    use super::murmurhash3;
+    use super::{murmurhash3, murmurhash3_with_seed};
+
+    #[test]
+    fn test_murmur3_with_seed() {
+        // Default seed must match the original function.
+        const DEFAULT_SEED: u32 = 3_242_157_231;
+        assert_eq!(
+            murmurhash3_with_seed::<DEFAULT_SEED>(b"abc"),
+            murmurhash3(b"abc")
+        );
+        // A different seed must produce a different hash.
+        assert_ne!(
+            murmurhash3_with_seed::<0>(b"abc"),
+            murmurhash3(b"abc")
+        );
+        // Same seed and input must be deterministic.
+        assert_eq!(
+            murmurhash3_with_seed::<42>(b"hello"),
+            murmurhash3_with_seed::<42>(b"hello")
+        );
+    }
 
     #[test]
     fn test_murmur3() {

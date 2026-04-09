@@ -1,8 +1,8 @@
 mod murmurhash2;
 mod murmurhash3;
 
-pub use self::murmurhash2::murmurhash2;
-pub use self::murmurhash3::murmurhash3;
+pub use self::murmurhash2::{murmurhash2, murmurhash2_with_seed};
+pub use self::murmurhash3::{murmurhash3, murmurhash3_with_seed};
 
 #[cfg(test)]
 mod test {

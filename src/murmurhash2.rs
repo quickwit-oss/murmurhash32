@@ -5,6 +5,12 @@ const M: u32 = 0x5bd1_e995;
 
 #[inline]
 pub fn murmurhash2(key: &[u8]) -> u32 {
+    murmurhash2_with_seed::<SEED>(key)
+}
+
+/// Murmurhash2 with a compile-time seed.
+#[inline]
+pub fn murmurhash2_with_seed<const SEED: u32>(key: &[u8]) -> u32 {
     let mut h: u32 = SEED ^ (key.len() as u32);
 
     let mut four_bytes_chunks = key.chunks_exact(4);
@@ -46,7 +52,7 @@ pub fn murmurhash2(key: &[u8]) -> u32 {
 #[cfg(test)]
 mod test {
 
-    use super::murmurhash2;
+    use super::{murmurhash2, murmurhash2_with_seed};
     use std::collections::HashSet;
 
     #[test]
@@ -70,6 +76,26 @@ mod test {
         assert_eq!(murmurhash2("abcd".as_bytes()), 2_588_571_162);
         assert_eq!(murmurhash2("abcde".as_bytes()), 29_886_969_42);
         assert_eq!(murmurhash2("abcdefghijklmnop".as_bytes()), 2_350_868_870);
+    }
+
+    #[test]
+    fn test_murmur2_with_seed() {
+        // Default seed must match the original function.
+        const DEFAULT_SEED: u32 = 3_242_157_231;
+        assert_eq!(
+            murmurhash2_with_seed::<DEFAULT_SEED>(b"abc"),
+            murmurhash2(b"abc")
+        );
+        // A different seed must produce a different hash.
+        assert_ne!(
+            murmurhash2_with_seed::<0>(b"abc"),
+            murmurhash2(b"abc")
+        );
+        // Same seed and input must be deterministic.
+        assert_eq!(
+            murmurhash2_with_seed::<42>(b"hello"),
+            murmurhash2_with_seed::<42>(b"hello")
+        );
     }
 
     #[test]
